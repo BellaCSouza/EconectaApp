@@ -29,9 +29,22 @@ export default function Login() {
     <KeyboardAwareScrollView>
         <View style={styles.container}>
             <Image
-                source={require("./assets/logotipo_econecta_341x98.png")}
-                style={{ marginTop: 40, justifyContent: 'row', alignItems: 'center', top: 0 }}
+                source={require("../../assets/logo.png")}
+                style={styles.logo}
             />
+
+            <Text style={styles.txtLogin}>Login</Text>
+
+            <View style={styles.areaInput}>
+              <Text style={styles.txtInput}>Email:</Text>
+              
+              <TextInput
+                style={styles.input}
+                placeholder='seu@email.com'
+                value={email}
+                onChangeText={setEmail}
+              />
+            </View>
         </View>
     </KeyboardAwareScrollView>
   );
@@ -40,8 +53,28 @@ export default function Login() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'flex-start',
+    backgroundColor: "#000",
+  },
+  logo: {
+    width: 120,
+    height: 32,
+    marginTop: 20,
+  },
+  txtLogin: {
+    fontSize: 35,
+    color: "#fff",
+    fontFamily: "Montserrat_400Regular",
+    marginBottom: 40,
+    marginTop: 35,
+  },
+  areaInput: {
+    
+  },
+  txtInput: {
+    marginBottom: 3,
+    color: "#fff",
+    fontFamily: "Montserrat_400Regular",
   },
 });
