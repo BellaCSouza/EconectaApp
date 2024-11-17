@@ -24,7 +24,7 @@ export default function Main() {
         />
         <View style={styles.areaMain}> 
 
-            <Text style={styles.txt}>Conectando tecnologia{"\n"}e agricultura</Text>
+            <Text style={styles.txt}>Conectando tecnologia{"\n"}e agricultura!</Text>
 
             <TouchableOpacity style={styles.botao} onPress={() => navigation.navigate("Login")}>
                 <Text style={styles.txtBotao}>Login</Text>
@@ -55,7 +55,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   txt: {
-    fontSize: 24,
+    fontSize: 28,
     color: "#fff",
     fontFamily: "Montserrat_400Regular",
     marginBottom: 40,

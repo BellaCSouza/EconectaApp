@@ -8,51 +8,122 @@ import {
     TouchableOpacity,
     Alert
 } from 'react-native';
+import { Picker } from '@react-native-picker/picker';
 import { useNavigation } from '@react-navigation/native';
 import { useFonts, Montserrat_400Regular, Montserrat_600SemiBold } from '@expo-google-fonts/montserrat';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { db } from "../Config/firebaseConnection";
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc, collection, addDoc } from 'firebase/firestore';
 
 
-export default function Login() {
+export default function Cadastrar() {
     const navegacao = useNavigation();
     const [fontsCarregadas] = useFonts({ Montserrat_400Regular, Montserrat_600SemiBold });
 
+    const [nome, setNome] = useState("");
+    const [sobrenome, setSobrenome] = useState("");
+    const [idade, setIdade] = useState("");
+    const [genero, setGenero] = useState("");
     const [email, setEmail] = useState("");
     const [senha, setSenha] = useState("");
     const [senhaVisivel, setSenhaVisivel] = useState(false);
     const [carregando, setCarregando] = useState(false);
+    const [formVisivel, setFormVisivel] = useState(true);
 
     if (!fontsCarregadas) {
         return null;
     }
 
-    const handleLogin = async () => {
-      let usuario = { email, senha };
-
-      if (!usuario.email || !usuario.senha) {
-        Alert.alert("Atenção", "Preencha todos os campos!");
-        return;
-      }
-      
-      navegacao.navigate("Home");
+    async function handleCadastrar() {
+      await addDoc(collection(db, "usuarios"), {
+        nome,
+        sobrenome,
+        idade,
+        genero
+      })
+      .then(() => {
+        Alert.alert("Sucesso", "Usuário cadastrado!")
+        setNome(""),
+        setSobrenome(""),
+        setIdade(""),
+        setGenero(""),
+        setEmail(""),
+        setSenha("")
+        navegacao.navigate("Login")
+        })
+        .catch((err) => {
+        Alert.alert("Erro", `Não foi possível cadastrar. Erro: ${err.message}`)
+        })
     }
 
   return (
     <KeyboardAwareScrollView>
         <View style={styles.container}>
+
             <Image
                 source={require("../../assets/logo.png")}
                 style={styles.logo}
             />
 
-            <Text style={styles.txtLogin}>Login</Text>
+            <Text style={styles.txtCadastrar}>Cadastrar</Text>
+            
+            <View style={styles.areaInput}>
+              <Text style={styles.txtInput}>Nome:</Text>
+              
+              <TextInput
+                style={styles.txtDados}
+                placeholder='seu nome'
+                placeholderTextColor={"#a0a0a0"}
+                value={nome}
+                onChangeText={setNome}
+              />
+            </View>
+
+            <View style={styles.areaInput}>
+              <Text style={styles.txtInput}>Sobrenome:</Text>
+              
+              <TextInput
+                style={styles.txtDados}
+                placeholder='seu sobrenome'
+                placeholderTextColor={"#a0a0a0"}
+                value={sobrenome}
+                onChangeText={setSobrenome}
+              />
+            </View>
+
+            <View style={styles.areaInput}>
+              <Text style={styles.txtInput}>Idade:</Text>
+              
+              <TextInput
+                style={styles.txtDados}
+                placeholder='sua idade'
+                placeholderTextColor={"#a0a0a0"}
+                value={idade}
+                onChangeText={setIdade}
+              />
+            </View>
+
+            <View style={styles.areaInput}>
+              <Text style={styles.txtInput}>Gênero:</Text>
+
+                <View style={styles.areaPicker}> 
+                    <Picker
+                    selectedValue={genero}
+                    onValueChange={setGenero}
+                    style={styles.picker}
+                    dropdownIconColor="#fff"
+                    >
+                    <Picker.Item label="Masculino" value="Masculino" style={styles.itemPicker}/>
+                    <Picker.Item label="Feminino" value="Feminino" style={styles.itemPicker}/>
+                    </Picker>
+                </View>
+            </View>
+
             <View style={styles.areaInput}>
               <Text style={styles.txtInput}>Email:</Text>
               
               <TextInput
-                style={styles.email}
+                style={styles.txtDados}
                 placeholder='seu@email.com'
                 placeholderTextColor={"#a0a0a0"}
                 value={email}
@@ -64,7 +135,7 @@ export default function Login() {
               <Text style={styles.txtInput}>Senha:</Text>
               <View style={{ flexDirection: "row", alignItems: "center" }}> 
               <TextInput
-                style={styles.senha}
+                style={styles.txtDados}
                 placeholder='********'
                 placeholderTextColor={"#a0a0a0"}
                 secureTextEntry={!senhaVisivel}
@@ -87,8 +158,8 @@ export default function Login() {
               </View>
             </View>
 
-            <TouchableOpacity style={styles.btnLogin} onPress={handleLogin}>
-              <Text style={styles.txtBtnLogin}>Login</Text>
+            <TouchableOpacity style={styles.btnCadastrar} onPress={handleCadastrar}>
+              <Text style={styles.txtBtnCadastrar}>Cadastrar</Text>
             </TouchableOpacity>
         </View>
     </KeyboardAwareScrollView>
@@ -107,7 +178,7 @@ const styles = StyleSheet.create({
     height: 32,
     marginTop: 20,
   },
-  txtLogin: {
+  txtCadastrar: {
     fontSize: 40,
     color: "#fff",
     fontFamily: "Montserrat_400Regular",
@@ -124,7 +195,7 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontFamily: "Montserrat_400Regular",
   },
-  email: {
+  txtDados: {
     color: "#fff",
     width: "100%",
     padding: 15,
@@ -134,25 +205,36 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontFamily: "Montserrat_400Regular",
   },
-  senha: {
-    color: "#fff",
-    width: "100%",
-    padding: 15,
-    borderWidth: 2,
-    borderColor: "#fff",
+  areaPicker: {
+    width: '100%',
+    backgroundColor: '#fff',
     borderRadius: 30,
-    fontSize: 20,
+    overflow: 'hidden',
+    borderWidth: 2,
+    borderColor: '#fff',
+    fontFamily: "Montserrat_400Regular",
+    fontSize: 22,
+  },
+  picker: {
+    width: '100%',
+    backgroundColor: '#000',
+    color: "#fff",
+    alignSelf: 'flex-start',
+  },
+  pickerItem: {
+    fontSize: 22,
     fontFamily: "Montserrat_400Regular",
   },
-  btnLogin: {
-    marginTop: 70,
+  btnCadastrar: {
+    marginTop: 50,
     backgroundColor: "#f28123",
     borderRadius: 30,
     padding: 10,
     width: 270,
     height: 50,
+    marginBottom: 50,
   },
-  txtBtnLogin: {
+  txtBtnCadastrar: {
     color: "#000",
     textAlign: 'center',
     fontSize: 24,
