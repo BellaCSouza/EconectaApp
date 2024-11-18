@@ -12,8 +12,10 @@ import { Picker } from '@react-native-picker/picker';
 import { useNavigation } from '@react-navigation/native';
 import { useFonts, Montserrat_400Regular, Montserrat_600SemiBold } from '@expo-google-fonts/montserrat';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
-import { db } from "../Config/firebaseConnection";
-import { doc, getDoc, setDoc, collection, addDoc } from 'firebase/firestore';
+import { db, auth } from "../Config/firebaseConnection";
+import { doc, getDoc, setDoc, collection, addDoc, updateDoc } from 'firebase/firestore';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
+
 
 
 export default function Cadastrar() {
@@ -27,33 +29,42 @@ export default function Cadastrar() {
     const [email, setEmail] = useState("");
     const [senha, setSenha] = useState("");
     const [senhaVisivel, setSenhaVisivel] = useState(false);
-    const [carregando, setCarregando] = useState(false);
-    const [formVisivel, setFormVisivel] = useState(true);
 
     if (!fontsCarregadas) {
         return null;
     }
 
     async function handleCadastrar() {
-      await addDoc(collection(db, "usuarios"), {
-        nome,
-        sobrenome,
-        idade,
-        genero
-      })
-      .then(() => {
-        Alert.alert("Sucesso", "Usuário cadastrado!")
-        setNome(""),
-        setSobrenome(""),
-        setIdade(""),
-        setGenero(""),
-        setEmail(""),
-        setSenha("")
-        navegacao.navigate("Login")
-        })
-        .catch((err) => {
-        Alert.alert("Erro", `Não foi possível cadastrar. Erro: ${err.message}`)
-        })
+      if (!nome || !sobrenome || !idade || !genero || !email || !senha) {
+        Alert.alert("Atenção", "Preencha todos os campos!");
+        return;
+      }
+
+      try {
+        const usuarioDocRef = await addDoc(collection(db, "usuario"), {
+          nome,
+          sobrenome,
+          idade,
+          genero,
+          email,
+        });
+
+        const credencialUsuario = await createUserWithEmailAndPassword(auth, email, senha);
+        const user = credencialUsuario.user;
+
+        await updateDoc(usuarioDocRef, { uid: user.uid });
+    
+        Alert.alert("Sucesso", "Usuário cadastrado!");
+        setNome("");
+        setSobrenome("");
+        setIdade("");
+        setGenero("");
+        setEmail("");
+        setSenha("");
+        navegacao.navigate("Login");
+      } catch (err) {
+        Alert.alert("Erro", `Não foi possível cadastrar. Erro: ${err.message}`);
+      }
     }
 
   return (

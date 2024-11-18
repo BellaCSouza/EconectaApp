@@ -11,9 +11,9 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import { useFonts, Montserrat_400Regular, Montserrat_600SemiBold } from '@expo-google-fonts/montserrat';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
-import { db } from "../Config/firebaseConnection";
-import { doc, getDoc } from 'firebase/firestore';
-
+import { db, auth } from "../Config/firebaseConnection";
+import { collection, doc, getDocs, query, where } from 'firebase/firestore';
+import { signInWithEmailAndPassword } from 'firebase/auth';
 
 export default function Login() {
     const navegacao = useNavigation();
@@ -22,22 +22,39 @@ export default function Login() {
     const [email, setEmail] = useState("");
     const [senha, setSenha] = useState("");
     const [senhaVisivel, setSenhaVisivel] = useState(false);
-    const [carregando, setCarregando] = useState(false);
 
     if (!fontsCarregadas) {
         return null;
     }
 
-    const handleLogin = async () => {
-      let usuario = { email, senha };
-
-      if (!usuario.email || !usuario.senha) {
+    async function handleLogin() {
+      if (!email || !senha) {
         Alert.alert("Atenção", "Preencha todos os campos!");
         return;
       }
-      
-      navegacao.navigate("Home");
+
+      try {
+        const credencialUsuario = await signInWithEmailAndPassword(auth, email, senha);
+        const user = credencialUsuario.user;
+
+        const usuarioDocs = query(collection(db, "usuario"), where("uid", "==", user.uid));
+        const querySnapshot = await getDocs(usuarioDocs);
+
+        if (!querySnapshot.empty) {
+          const dadosUsuario = querySnapshot.docs[0].data();
+          console.log("Dados do usuário: ", dadosUsuario);
+
+          setEmail("");
+          setSenha("");
+          navegacao.navigate("Home", { usuario: dadosUsuario });
+        } else {
+          Alert.alert("Erro", "Usuário não encontrado no banco de dados.");
+        }
+      } catch (err) {
+        Alert.alert("Erro", `Email e/ou senha incorreta. Erro: ${err.message}`);
+      }
     }
+    
 
   return (
     <KeyboardAwareScrollView>

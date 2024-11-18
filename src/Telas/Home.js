@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   StyleSheet,
   View,
@@ -15,37 +15,14 @@ import { doc, getDoc, onSnapshot } from 'firebase/firestore';
 
 export default function Home() {
   const navegacao = useNavigation();
-  const [nome, setNome] = useState("Carregando...");
-
-  useEffect(() => {
-    async function getDados() {
-        // Forma de buscar uma única vez e encerrar conexão
-        const docref = doc(db, "usuarios", "1")
-
-        getDoc(docref)
-        .then((snapshot) => {
-             setNome(snapshot.data()?.nome)
-        })
-        .catch((err) => {
-            console.log("erro: ")
-            console.log(err);
-        })
-
-        // Forma de buscar real time
-        // onSnapshot(doc(db, "usuarios", "1"), (doc) => {
-        //     setNome(doc.data()?.nome)
-        // })
-    }
-
-    getDados();
-  }, [])
+  const rota = useRoute();
+  const { usuario } = rota.params;
+  const [nome, setNome] = useState(usuario.nome || "Carregando...");
 
   const [fontsCarregadas] = useFonts({ 
     Montserrat_400Regular,
     Montserrat_600SemiBold 
     });
-
-    const [carregando, setCarregando] = useState(false);
 
     if (!fontsCarregadas) {
         return null;
