@@ -11,12 +11,14 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import { useFonts, Montserrat_400Regular, Montserrat_600SemiBold } from '@expo-google-fonts/montserrat';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
-import { db, auth } from "../Config/firebaseConnection";
-import { collection, doc, getDocs, query, where } from 'firebase/firestore';
+import { db, auth } from "../config/firebaseConnection";
+import { collection, getDocs, query, where } from 'firebase/firestore';
 import { signInWithEmailAndPassword } from 'firebase/auth';
+import { useUser } from "../context/userContext";
 
 export default function Login() {
     const navegacao = useNavigation();
+    const { setUsuario } = useUser();
     const [fontsCarregadas] = useFonts({ Montserrat_400Regular, Montserrat_600SemiBold });
 
     const [email, setEmail] = useState("");
@@ -44,12 +46,27 @@ export default function Login() {
           const dadosUsuario = querySnapshot.docs[0].data();
           console.log("Dados do usuário: ", dadosUsuario);
 
-          setEmail("");
-          setSenha("");
-          navegacao.navigate("Home", { usuario: dadosUsuario });
+          if (
+            dadosUsuario &&
+            dadosUsuario.email &&
+            dadosUsuario.nome &&
+            dadosUsuario.sobrenome &&
+            dadosUsuario.idade &&
+            dadosUsuario.genero &&
+            dadosUsuario.uid
+          ) {
+            setEmail("");
+            setSenha("");
+
+            setUsuario(dadosUsuario);
+            navegacao.navigate("tab");
         } else {
+          Alert.alert("Erro", "Dados do usuário estão incompletos no banco.");
+        }
+      } else {
           Alert.alert("Erro", "Usuário não encontrado no banco de dados.");
         }
+      
       } catch (err) {
         Alert.alert("Erro", `Email e/ou senha incorreta. Erro: ${err.message}`);
       }
@@ -65,6 +82,7 @@ export default function Login() {
             />
 
             <Text style={styles.txtLogin}>Login</Text>
+            
             <View style={styles.areaInput}>
               <Text style={styles.txtInput}>Email:</Text>
               

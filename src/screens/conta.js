@@ -1,71 +1,50 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from "react";
 import {
-    StyleSheet,
-    Text,
-    View,
-    TextInput,
-    Image,
-    TouchableOpacity,
-    Alert
-} from 'react-native';
-import { Picker } from '@react-native-picker/picker';
-import { useNavigation } from '@react-navigation/native';
-import { useFonts, Montserrat_400Regular, Montserrat_600SemiBold } from '@expo-google-fonts/montserrat';
+  StyleSheet,
+  View,
+  Image,
+  TouchableOpacity,
+  Text,
+  TextInput,
+  ScrollView,
+  ActivityIndicator,
+} from "react-native";
+import { useUser } from "../context/userContext";
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
-import { db, auth } from "../Config/firebaseConnection";
-import { doc, getDoc, setDoc, collection, addDoc, updateDoc } from 'firebase/firestore';
-import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { Picker } from '@react-native-picker/picker';
+import { useFonts, Montserrat_400Regular, Montserrat_600SemiBold } from "@expo-google-fonts/montserrat";
 
-
-
-export default function Cadastrar() {
-    const navegacao = useNavigation();
-    const [fontsCarregadas] = useFonts({ Montserrat_400Regular, Montserrat_600SemiBold });
-
-    const [nome, setNome] = useState("");
-    const [sobrenome, setSobrenome] = useState("");
-    const [idade, setIdade] = useState("");
-    const [genero, setGenero] = useState("");
-    const [email, setEmail] = useState("");
+export default function Conta() {
+    const { usuario, setUsuario } = useUser();
+    const [nome, setNome] = useState(usuario?.nome);
+    const [sobrenome, setSobrenome] = useState(usuario?.sobrenome);
+    const [idade, setIdade] = useState(usuario?.idade);
+    const [genero, setGenero] = useState(usuario?.genero);
+    const [email, setEmail] = useState(usuario?.email);
     const [senha, setSenha] = useState("");
     const [senhaVisivel, setSenhaVisivel] = useState(false);
-
-    if (!fontsCarregadas) {
-        return null;
-    }
-
-    async function handleCadastrar() {
-      if (!nome || !sobrenome || !idade || !genero || !email || !senha) {
-        Alert.alert("Atenção", "Preencha todos os campos!");
-        return;
-      }
-
-      try {
-        const usuarioDocRef = await addDoc(collection(db, "usuario"), {
-          nome,
-          sobrenome,
-          idade,
-          genero,
-          email,
+    const [editando, setEditando] = useState(false);
+    
+    const [fontsCarregadas] = useFonts({ 
+        Montserrat_400Regular,
+        Montserrat_600SemiBold 
         });
 
-        const credencialUsuario = await createUserWithEmailAndPassword(auth, email, senha);
-        const user = credencialUsuario.user;
+        if (!usuario) {
+            return (
+              <View style={styles.container}>
+                <Text style={styles.text}>Usuário não encontrado!</Text>
+              </View>
+            );
+          }
 
-        await updateDoc(usuarioDocRef, { uid: user.uid });
-    
-        Alert.alert("Sucesso", "Usuário cadastrado!");
-        setNome("");
-        setSobrenome("");
-        setIdade("");
-        setGenero("");
-        setEmail("");
-        setSenha("");
-        navegacao.navigate("Login");
-      } catch (err) {
-        Alert.alert("Erro", `Não foi possível cadastrar. Erro: ${err.message}`);
-      }
-    }
+        if (!fontsCarregadas) {
+            return null;
+        }
+
+        async function handleSalvar() {
+            setEditando(false);
+        }
 
   return (
     <KeyboardAwareScrollView>
@@ -76,7 +55,7 @@ export default function Cadastrar() {
                 style={styles.logo}
             />
 
-            <Text style={styles.txtCadastrar}>Cadastrar</Text>
+            <Text style={styles.txtCadastrar}>Minha Conta</Text>
             
             <View style={styles.areaInput}>
               <Text style={styles.txtInput}>Nome:</Text>
@@ -87,6 +66,7 @@ export default function Cadastrar() {
                 placeholderTextColor={"#a0a0a0"}
                 value={nome}
                 onChangeText={setNome}
+                editable={editando}
               />
             </View>
 
@@ -99,6 +79,7 @@ export default function Cadastrar() {
                 placeholderTextColor={"#a0a0a0"}
                 value={sobrenome}
                 onChangeText={setSobrenome}
+                editable={editando}
               />
             </View>
 
@@ -111,6 +92,7 @@ export default function Cadastrar() {
                 placeholderTextColor={"#a0a0a0"}
                 value={idade}
                 onChangeText={setIdade}
+                editable={editando}
               />
             </View>
 
@@ -121,6 +103,7 @@ export default function Cadastrar() {
                     <Picker
                     selectedValue={genero}
                     onValueChange={setGenero}
+                    enabled={editando}
                     style={styles.picker}
                     dropdownIconColor="#fff"
                     >
@@ -139,6 +122,7 @@ export default function Cadastrar() {
                 placeholderTextColor={"#a0a0a0"}
                 value={email}
                 onChangeText={setEmail}
+                editable={editando}
               />
             </View>
 
@@ -152,6 +136,7 @@ export default function Cadastrar() {
                 secureTextEntry={!senhaVisivel}
                 value={senha}
                 onChangeText={setSenha}
+                editable={editando}
               />
               <TouchableOpacity
               style={styles.olhoIcon}
@@ -169,8 +154,19 @@ export default function Cadastrar() {
               </View>
             </View>
 
-            <TouchableOpacity style={styles.btnCadastrar} onPress={handleCadastrar}>
-              <Text style={styles.txtBtnCadastrar}>Cadastrar</Text>
+            <TouchableOpacity
+                style={styles.btn}
+                onPress={() => {
+                    if (editando) {
+                    handleSalvar();
+                    } else {
+                    setEditando(true);
+                    }
+                }}
+            >
+                <Text style={styles.txtBtn}>
+                    {editando ? "Salvar" : "Editar"}
+                </Text>
             </TouchableOpacity>
         </View>
     </KeyboardAwareScrollView>
@@ -236,7 +232,7 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontFamily: "Montserrat_400Regular",
   },
-  btnCadastrar: {
+  btn: {
     marginTop: 50,
     backgroundColor: "#f28123",
     borderRadius: 30,
@@ -245,7 +241,7 @@ const styles = StyleSheet.create({
     height: 50,
     marginBottom: 50,
   },
-  txtBtnCadastrar: {
+  txtBtn: {
     color: "#000",
     textAlign: 'center',
     fontSize: 24,
@@ -257,5 +253,11 @@ const styles = StyleSheet.create({
   icon: {
     width: 24,
     height: 24,
+  },
+  image: {
+    width: 200,
+    height: 200,
+    borderRadius: 100,
+    marginBottom: 20,
   },
 });

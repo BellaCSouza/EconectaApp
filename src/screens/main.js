@@ -4,7 +4,7 @@ import { useNavigation } from "@react-navigation/native";
 import { useFonts, Montserrat_400Regular, Montserrat_600SemiBold } from '@expo-google-fonts/montserrat';
 
 export default function Main() {
-  const navigation = useNavigation();
+  const navegacao = useNavigation();
   const [fontsCarregadas] = useFonts({ 
     Montserrat_400Regular,
     Montserrat_600SemiBold 
@@ -26,11 +26,11 @@ export default function Main() {
 
             <Text style={styles.txt}>Conectando tecnologia{"\n"}e agricultura!</Text>
 
-            <TouchableOpacity style={styles.botao} onPress={() => navigation.navigate("Login")}>
+            <TouchableOpacity style={styles.botao} onPress={() => navegacao.navigate("login")}>
                 <Text style={styles.txtBotao}>Login</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.botao} onPress={() => navigation.navigate("Cadastrar")}>
+            <TouchableOpacity style={styles.botao} onPress={() => navegacao.navigate("cadastrar")}>
                 <Text style={styles.txtBotao}>Cadastrar</Text>
             </TouchableOpacity>
         </View>
@@ -43,6 +43,7 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'flex-start',
+    backgroundColor: '#000',
   },
   logo: {
     width: 120,

@@ -8,25 +8,27 @@ import {
   ScrollView,
   ActivityIndicator,
 } from "react-native";
-import { useNavigation, useRoute } from "@react-navigation/native";
+import { useUser } from "../context/userContext";
 import { useFonts, Montserrat_400Regular, Montserrat_600SemiBold } from "@expo-google-fonts/montserrat";
-import { db } from "../Config/firebaseConnection";
-import { doc, getDoc, onSnapshot } from 'firebase/firestore';
 
-export default function Home() {
-  const navegacao = useNavigation();
-  const rota = useRoute();
-  const { usuario } = rota.params;
-  const [nome, setNome] = useState(usuario.nome || "Carregando...");
+export default function Lumi() {
+    const { usuario } = useUser();
+    const [fontsCarregadas] = useFonts({ 
+        Montserrat_400Regular,
+        Montserrat_600SemiBold 
+        });
 
-  const [fontsCarregadas] = useFonts({ 
-    Montserrat_400Regular,
-    Montserrat_600SemiBold 
-    });
+        if (!usuario) {
+            return (
+              <View style={styles.container}>
+                <Text style={styles.text}>Usuário não encontrado!</Text>
+              </View>
+            );
+          }
 
-    if (!fontsCarregadas) {
-        return null;
-    }
+        if (!fontsCarregadas) {
+            return null;
+        }
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -38,7 +40,7 @@ export default function Home() {
                 />
             </View>
             <View style={styles.body}>
-                <Text style={styles.txtOla}>Olá, {nome}!</Text>
+                <Text style={styles.txtOla}>Teste</Text>
             </View>
         </View>
     </ScrollView>
@@ -48,14 +50,21 @@ export default function Home() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+        backgroundColor: '#000',
     },
     logo: {
         width: 120,
         height: 32,
-        marginTop: 20,
+        marginTop: 60,
+    },
+    areaNav: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
     },
     txtOla: {
-        marginTop: 40,
+        marginTop: 80,
+        marginLeft: 20,
         fontSize: 40,
         fontFamily: "Montserrat_400Regular",
         color: "#fff",
