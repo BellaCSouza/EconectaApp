@@ -8,15 +8,20 @@ import {
   TextInput,
   ScrollView,
   ActivityIndicator,
+  Alert,
 } from "react-native";
 import { useUser } from "../context/userContext";
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { Picker } from '@react-native-picker/picker';
 import { useFonts, Montserrat_400Regular, Montserrat_600SemiBold } from "@expo-google-fonts/montserrat";
+import { db, auth } from "../config/firebaseConnection";
+import { doc, getDocs, query, collection, where, updateDoc } from 'firebase/firestore';
+import { updatePassword, updateEmail } from "firebase/auth";
 
 export default function Conta() {
     const { usuario, setUsuario } = useUser();
-    const [nome, setNome] = useState(usuario?.nome);
+    const [nome, setNome] = useState(usuario?.nome)
+    const [uid, setUid] = useState(usuario?.uid);
     const [sobrenome, setSobrenome] = useState(usuario?.sobrenome);
     const [idade, setIdade] = useState(usuario?.idade);
     const [genero, setGenero] = useState(usuario?.genero);
@@ -43,7 +48,52 @@ export default function Conta() {
         }
 
         async function handleSalvar() {
-            setEditando(false);
+          if (!nome || !sobrenome || !idade || !genero || !email) {
+            Alert.alert("Atenção", "Preencha todos os campos!");
+            return;
+          }
+        
+          try {
+            const usuarioDocs = query(collection(db, "usuario"), where("uid", "==", usuario.uid));
+            const querySnapshot = await getDocs(usuarioDocs);
+        
+            if (!querySnapshot.empty) {
+              const docId = querySnapshot.docs[0].id;
+              const docRef = doc(db, "usuario", docId);
+        
+              await updateDoc(docRef, {
+                nome: nome,
+                sobrenome: sobrenome,
+                idade: idade,
+                genero: genero,
+                email: email,
+              });
+        
+              if (senha) {
+                const user = auth.currentUser;
+                if (user) {
+                  await updatePassword(user, senha);
+                  Alert.alert("Sucesso", "Senha atualizada com sucesso!");
+                } else {
+                  Alert.alert("Erro", "Não foi possível atualizar a senha. Usuário não autenticado.");
+                }
+              }
+        
+              setUsuario({ ...usuario, nome, sobrenome, idade, genero, email });
+        
+              setEditando(false);
+              Alert.alert("Sucesso", "Dados atualizados com sucesso!");
+            } else {
+              Alert.alert("Erro", "Usuário não encontrado no banco de dados.");
+            }
+          } catch (error) {
+            console.error("Erro ao salvar os dados: ", error);
+            if (error.code === "auth/requires-recent-login") {
+              Alert.alert("Erro", "Para atualizar a senha, faça login novamente.");
+            } else {
+              Alert.alert("Erro", `Erro ao atualizar os dados: ${error.message}`);
+            }
+          }
         }
 
   return (
