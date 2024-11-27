@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import {
-    StyleSheet,
-    Text,
-    View,
-    TextInput,
-    Image,
-    TouchableOpacity,
-    Alert
+  StyleSheet,
+  Text,
+  View,
+  TextInput,
+  Image,
+  TouchableOpacity,
+  Alert,
+  Button
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useFonts, Montserrat_400Regular, Montserrat_600SemiBold } from '@expo-google-fonts/montserrat';
@@ -17,115 +18,129 @@ import { signInWithEmailAndPassword } from 'firebase/auth';
 import { useUser } from "../context/userContext";
 
 export default function Login() {
-    const navegacao = useNavigation();
-    const { setUsuario } = useUser();
-    const [fontsCarregadas] = useFonts({ Montserrat_400Regular, Montserrat_600SemiBold });
+  const navegacao = useNavigation();
+  const { setUsuario } = useUser();
+  const [fontsCarregadas] = useFonts({ Montserrat_400Regular, Montserrat_600SemiBold });
 
-    const [email, setEmail] = useState("");
-    const [senha, setSenha] = useState("");
-    const [senhaVisivel, setSenhaVisivel] = useState(false);
+  const [email, setEmail] = useState("");
+  const [senha, setSenha] = useState("");
+  const [senhaVisivel, setSenhaVisivel] = useState(false);
 
-    if (!fontsCarregadas) {
-        return null;
+  if (!fontsCarregadas) {
+    return null;
+  }
+
+  async function handleLogin() {
+    if (!email || !senha) {
+      Alert.alert("Atenção", "Preencha todos os campos!");
+      return;
     }
 
-    async function handleLogin() {
-      if (!email || !senha) {
-        Alert.alert("Atenção", "Preencha todos os campos!");
-        return;
-      }
+    try {
+      const credencialUsuario = await signInWithEmailAndPassword(auth, email, senha);
+      const user = credencialUsuario.user;
 
-      try {
-        const credencialUsuario = await signInWithEmailAndPassword(auth, email, senha);
-        const user = credencialUsuario.user;
+      const usuarioDocs = query(collection(db, "usuario"), where("uid", "==", user.uid));
+      const querySnapshot = await getDocs(usuarioDocs);
 
-        const usuarioDocs = query(collection(db, "usuario"), where("uid", "==", user.uid));
-        const querySnapshot = await getDocs(usuarioDocs);
+      if (!querySnapshot.empty) {
+        const dadosUsuario = querySnapshot.docs[0].data();
+        console.log("Dados do usuário: ", dadosUsuario);
 
-        if (!querySnapshot.empty) {
-          const dadosUsuario = querySnapshot.docs[0].data();
-          console.log("Dados do usuário: ", dadosUsuario);
+        if (
+          dadosUsuario &&
+          dadosUsuario.email &&
+          dadosUsuario.nome &&
+          dadosUsuario.sobrenome &&
+          dadosUsuario.idade &&
+          dadosUsuario.genero &&
+          dadosUsuario.uid
+        ) {
+          setEmail("");
+          setSenha("");
 
-          if (
-            dadosUsuario &&
-            dadosUsuario.email &&
-            dadosUsuario.nome &&
-            dadosUsuario.sobrenome &&
-            dadosUsuario.idade &&
-            dadosUsuario.genero &&
-            dadosUsuario.uid
-          ) {
-            setEmail("");
-            setSenha("");
-
-            setUsuario(dadosUsuario);
-            navegacao.navigate("tab");
+          setUsuario(dadosUsuario);
+          navegacao.navigate("tab");
         } else {
           Alert.alert("Erro", "Dados do usuário estão incompletos no banco.");
         }
       } else {
-          Alert.alert("Erro", "Usuário não encontrado no banco de dados.");
-        }
-      
-      } catch (err) {
-        Alert.alert("Erro", `Email e/ou senha incorreta. Erro: ${err.message}`);
+        Alert.alert("Erro", "Usuário não encontrado no banco de dados.");
       }
+
+    } catch (err) {
+      Alert.alert("Erro", `Email e/ou senha incorreta. Erro: ${err.message}`);
     }
-    
+  }
+
 
   return (
     <KeyboardAwareScrollView>
-        <View style={styles.container}>
-            <Image
-                source={require("../../assets/logo.png")}
-                style={styles.logo}
+      <View style={styles.container}>
+        <Image
+          source={require("../../assets/logo.png")}
+          style={styles.logo}
+        />
+
+        <Text style={styles.txtLogin}>Login</Text>
+
+        <View style={styles.areaInput}>
+          <Text style={styles.txtInput}>Email:</Text>
+
+          <TextInput
+            style={styles.email}
+            placeholder='seu@email.com'
+            placeholderTextColor={"#a0a0a0"}
+            value={email}
+            onChangeText={setEmail}
+          />
+        </View>
+
+        <View style={styles.areaInput}>
+          <Text style={styles.txtInput}>Senha:</Text>
+          <View style={{ flexDirection: "row", alignItems: "center" }}>
+            <TextInput
+              style={styles.senha}
+              placeholder='********'
+              placeholderTextColor={"#a0a0a0"}
+              secureTextEntry={!senhaVisivel}
+              value={senha}
+              onChangeText={setSenha}
             />
-
-            <Text style={styles.txtLogin}>Login</Text>
-            
-            <View style={styles.areaInput}>
-              <Text style={styles.txtInput}>Email:</Text>
-              
-              <TextInput
-                style={styles.email}
-                placeholder='seu@email.com'
-                placeholderTextColor={"#a0a0a0"}
-                value={email}
-                onChangeText={setEmail}
-              />
-            </View>
-
-            <View style={styles.areaInput}>
-              <Text style={styles.txtInput}>Senha:</Text>
-              <View style={{ flexDirection: "row", alignItems: "center" }}> 
-              <TextInput
-                style={styles.senha}
-                placeholder='********'
-                placeholderTextColor={"#a0a0a0"}
-                secureTextEntry={!senhaVisivel}
-                value={senha}
-                onChangeText={setSenha}
-              />
-              <TouchableOpacity
+            <TouchableOpacity
               style={styles.olhoIcon}
               onPress={() => setSenhaVisivel(!senhaVisivel)}>
-                <Image
-                  source={
-                    senhaVisivel
-                      ? require("../../assets/olhoFechado.png")
-                      : require("../../assets/olhoAberto.png")
-                  }
-                  resizeMode="contain"
-                  style={styles.icon}
-                />
-              </TouchableOpacity>
-              </View>
-            </View>
-
-            <TouchableOpacity style={styles.btnLogin} onPress={handleLogin}>
-              <Text style={styles.txtBtnLogin}>Login</Text>
+              <Image
+                source={
+                  senhaVisivel
+                    ? require("../../assets/olhoFechado.png")
+                    : require("../../assets/olhoAberto.png")
+                }
+                resizeMode="contain"
+                style={styles.icon}
+              />
             </TouchableOpacity>
+          </View>
         </View>
+
+        <TouchableOpacity style={styles.btnLogin} onPress={handleLogin}>
+          <Text style={styles.txtBtnLogin}>Login</Text>
+        </TouchableOpacity>
+
+        <Text style={styles.areaRegister}>Ainda não possui uma conta?</Text>
+        <TouchableOpacity
+          onPress={() => navegacao.navigate("cadastrar")}>
+          <Text
+            style={{ color: '#f28123',
+             textAlign: 'center',
+              fontSize: 15,
+               fontFamily: "Montserrat_600SemiBold", 
+               marginBottom:40,}} >
+                Cadastre-se
+          </Text>
+        </TouchableOpacity>
+
+      </View>
     </KeyboardAwareScrollView>
   );
 }
@@ -186,6 +201,14 @@ const styles = StyleSheet.create({
     padding: 10,
     width: 270,
     height: 50,
+    marginBottom:11,
+  },
+  areaRegister: {
+    marginTop:150,
+    color: "#dddd",
+    textAlign: 'center',
+    fontSize: 15,
+    fontFamily: "Montserrat_600SemiBold",
   },
   txtBtnLogin: {
     color: "#000",

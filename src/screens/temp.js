@@ -43,7 +43,7 @@ export default function Temp() {
                 <View style={styles.body}>
                     {/* Primeiro gráfico */}
                     <View style={styles.webViewContainer}>
-                        <Text style={styles.title}>Temperatura</Text>
+                        <Text style={styles.title}>Área 1 {`\n`} Sensor 1</Text>
                         <WebView
                             style={styles.webView}
                             source={{ uri: 'https://example.com/temperatura' }}
@@ -52,28 +52,10 @@ export default function Temp() {
 
                     {/* Segundo gráfico */}
                     <View style={styles.webViewContainer}>
-                        <Text style={styles.title}>Umidade do Solo</Text>
+                        <Text style={styles.title}>Área 2 {`\n`} Sensor 1</Text>
                         <WebView
                             style={styles.webView}
                             source={{ uri: 'https://example.com/umidade-solo' }}
-                        />
-                    </View>
-
-                    {/* Terceiro gráfico */}
-                    <View style={styles.webViewContainer}>
-                        <Text style={styles.title}>Umidade do Ar</Text>
-                        <WebView
-                            style={styles.webView}
-                            source={{ uri: 'https://example.com/umidade-ar' }}
-                        />
-                    </View>
-
-                    {/* Quarto gráfico */}
-                    <View style={styles.webViewContainer}>
-                        <Text style={styles.title}>Luminosidade</Text>
-                        <WebView
-                            style={styles.webView}
-                            source={{ uri: 'https://example.com/luminosidade' }}
                         />
                     </View>
                 </View>
@@ -90,7 +72,8 @@ const styles = StyleSheet.create({
     logo: {
         width: 120,
         height: 32,
-        marginTop: 60,
+        marginTop: 40,
+        marginBottom: 55,
     },
     title: {
         fontSize: 22,
@@ -106,6 +89,7 @@ const styles = StyleSheet.create({
     webView: {
         flex: 1,
         borderWidth: 100,
+        marginBottom: 55,
     },
     areaNav: {
         flex: 1,
