@@ -82,7 +82,7 @@ export default function Login() {
           style={styles.logo}
         />
 
-        <Text style={styles.txtLogin}>Login</Text>
+        <Text style={styles.txtLogin}>Esqueci minha senha</Text>
 
         <View style={styles.areaInput}>
           <Text style={styles.txtInput}>Email:</Text>
@@ -96,58 +96,8 @@ export default function Login() {
           />
         </View>
 
-        <View style={styles.areaInput}>
-          <Text style={styles.txtInput}>Senha:</Text>
-          <View style={{ flexDirection: "row", alignItems: "center" }}>
-            <TextInput
-              style={styles.senha}
-              placeholder='********'
-              placeholderTextColor={"#a0a0a0"}
-              secureTextEntry={!senhaVisivel}
-              value={senha}
-              onChangeText={setSenha}
-            />
-            <TouchableOpacity
-              style={styles.olhoIcon}
-              onPress={() => setSenhaVisivel(!senhaVisivel)}>
-              <Image
-                source={
-                  senhaVisivel
-                    ? require("../../assets/olhoFechado.png")
-                    : require("../../assets/olhoAberto.png")
-                }
-                resizeMode="contain"
-                style={styles.icon}
-              />
-            </TouchableOpacity>
-          </View>
-        </View>
-
         <TouchableOpacity style={styles.btnLogin} onPress={handleLogin}>
-          <Text style={styles.txtBtnLogin}>Login</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          onPress={() => navegacao.navigate("trocaSenha")}>
-          <Text
-            style={{ color: '#f28123',
-             textAlign: 'center',
-              fontSize: 15,
-               fontFamily: "Montserrat_600SemiBold",}} >
-                Esqueci minha senha
-          </Text>
-        </TouchableOpacity>
-
-        <Text style={styles.areaRegister}>Ainda não possui uma conta?</Text>
-        <TouchableOpacity
-          onPress={() => navegacao.navigate("cadastrar")}>
-          <Text
-            style={{ color: '#f28123',
-             textAlign: 'center',
-              fontSize: 15,
-               fontFamily: "Montserrat_600SemiBold", 
-               marginBottom:40,}} >
-                Cadastre-se
-          </Text>
+          <Text style={styles.txtBtnLogin}>Enviar email</Text>
         </TouchableOpacity>
 
       </View>
@@ -211,7 +161,7 @@ const styles = StyleSheet.create({
     padding: 10,
     width: 270,
     height: 50,
-    marginBottom:11,
+    marginBottom:310,
   },
   areaRegister: {
     marginTop:150,

@@ -7,6 +7,7 @@ import Temp from "../screens/temp";
 import UmidSolo from "../screens/umidSolo";
 import UmidAr from "../screens/umidAr";
 import Lumi from "../screens/lumi";
+import trocaSenha from "../screens/trocaSenha";
 
 const Stack = createNativeStackNavigator();
 
@@ -44,6 +45,10 @@ export default function StackRoutes() {
             <Stack.Screen
             name="lumi"
             component={Lumi}
+            />
+            <Stack.Screen
+            name="trocaSenha"
+            component={trocaSenha}
             />
         </Stack.Navigator>
     )
