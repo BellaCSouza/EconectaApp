@@ -52,6 +52,8 @@ export default function Cadastrar() {
         const credencialUsuario = await createUserWithEmailAndPassword(auth, email, senha);
         const user = credencialUsuario.user;
 
+        
+
         await updateDoc(usuarioDocRef, { uid: user.uid });
     
         Alert.alert("Sucesso", "Usuário cadastrado!");
@@ -63,7 +65,7 @@ export default function Cadastrar() {
         setSenha("");
         navegacao.navigate("login");
       } catch (err) {
-        Alert.alert("Erro", `Não foi possível cadastrar. Erro: ${err.message}`);
+        Alert.alert("Erro", `E-mail já cadastrado`);
       }
     }
 

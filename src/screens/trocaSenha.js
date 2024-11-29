@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   StyleSheet,
   Text,
@@ -7,99 +7,68 @@ import {
   Image,
   TouchableOpacity,
   Alert,
-  Button
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useFonts, Montserrat_400Regular, Montserrat_600SemiBold } from '@expo-google-fonts/montserrat';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
-import { db, auth } from "../config/firebaseConnection";
-import { collection, getDocs, query, where } from 'firebase/firestore';
-import { signInWithEmailAndPassword } from 'firebase/auth';
-import { useUser } from "../context/userContext";
+import { auth } from "../config/firebaseConnection";
+import { sendPasswordResetEmail } from 'firebase/auth';
 
-export default function Login() {
-  const navegacao = useNavigation();
-  const { setUsuario } = useUser();
-  const [fontsCarregadas] = useFonts({ Montserrat_400Regular, Montserrat_600SemiBold });
+export default function TrocaSenha() {
+  const navigation = useNavigation();
+  const [fontsLoaded] = useFonts({
+    Montserrat_400Regular,
+    Montserrat_600SemiBold,
+  });
 
   const [email, setEmail] = useState("");
-  const [senha, setSenha] = useState("");
-  const [senhaVisivel, setSenhaVisivel] = useState(false);
 
-  if (!fontsCarregadas) {
-    return null;
+  if (!fontsLoaded) {
+    return null; // Aguarda as fontes serem carregadas
   }
 
-  async function handleLogin() {
-    if (!email || !senha) {
-      Alert.alert("Atenção", "Preencha todos os campos!");
+  // Função para enviar o e-mail de redefinição de senha
+  async function handlePasswordReset() {
+    if (!email) {
+      Alert.alert("Atenção", "Por favor, insira seu e-mail!");
       return;
     }
 
     try {
-      const credencialUsuario = await signInWithEmailAndPassword(auth, email, senha);
-      const user = credencialUsuario.user;
-
-      const usuarioDocs = query(collection(db, "usuario"), where("uid", "==", user.uid));
-      const querySnapshot = await getDocs(usuarioDocs);
-
-      if (!querySnapshot.empty) {
-        const dadosUsuario = querySnapshot.docs[0].data();
-        console.log("Dados do usuário: ", dadosUsuario);
-
-        if (
-          dadosUsuario &&
-          dadosUsuario.email &&
-          dadosUsuario.nome &&
-          dadosUsuario.sobrenome &&
-          dadosUsuario.idade &&
-          dadosUsuario.genero &&
-          dadosUsuario.uid
-        ) {
-          setEmail("");
-          setSenha("");
-
-          setUsuario(dadosUsuario);
-          navegacao.navigate("tab");
-        } else {
-          Alert.alert("Erro", "Dados do usuário estão incompletos no banco.");
-        }
-      } else {
-        Alert.alert("Erro", "Usuário não encontrado no banco de dados.");
-      }
-
-    } catch (err) {
-      Alert.alert("Erro", `Email e/ou senha incorreta. Erro: ${err.message}`);
+      await sendPasswordResetEmail(auth, email); // Envia o e-mail de redefinição de senha
+      Alert.alert(
+        "Sucesso",
+        "Um e-mail de redefinição de senha foi enviado para o endereço fornecido."
+      );
+      setEmail(""); // Limpa o campo de e-mail
+      navigation.goBack(); // Volta para a tela anterior (opcional)
+    } catch (error) {
+      Alert.alert("Erro", `Não foi possível enviar o e-mail: ${error.message}`);
     }
   }
-
 
   return (
     <KeyboardAwareScrollView>
       <View style={styles.container}>
-        <Image
-          source={require("../../assets/logo.png")}
-          style={styles.logo}
-        />
-
+        <Image source={require("../../assets/logo.png")} style={styles.logo} />
         <Text style={styles.txtLogin}>Esqueci minha senha</Text>
 
         <View style={styles.areaInput}>
-          <Text style={styles.txtInput}>Email:</Text>
-
+          <Text style={styles.txtInput}>E-mail:</Text>
           <TextInput
             style={styles.email}
             placeholder='seu@email.com'
             placeholderTextColor={"#a0a0a0"}
             value={email}
             onChangeText={setEmail}
+            keyboardType="email-address"
+            autoCapitalize="none"
           />
         </View>
 
-        <TouchableOpacity style={styles.btnLogin} onPress={handleLogin}>
-          <Text style={styles.txtBtnLogin}>Enviar email</Text>
+        <TouchableOpacity style={styles.btnLogin} onPress={handlePasswordReset}>
+          <Text style={styles.txtBtnLogin}>Enviar e-mail</Text>
         </TouchableOpacity>
-
       </View>
     </KeyboardAwareScrollView>
   );
@@ -129,22 +98,12 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   txtInput: {
-    marginBottom: 10,
+    marginBottom: 19,
     fontSize: 22,
     color: "#fff",
     fontFamily: "Montserrat_400Regular",
   },
   email: {
-    color: "#fff",
-    width: "100%",
-    padding: 15,
-    borderWidth: 2,
-    borderColor: "#fff",
-    borderRadius: 30,
-    fontSize: 20,
-    fontFamily: "Montserrat_400Regular",
-  },
-  senha: {
     color: "#fff",
     width: "100%",
     padding: 15,
@@ -161,26 +120,13 @@ const styles = StyleSheet.create({
     padding: 10,
     width: 270,
     height: 50,
-    marginBottom:310,
-  },
-  areaRegister: {
-    marginTop:150,
-    color: "#dddd",
-    textAlign: 'center',
-    fontSize: 15,
-    fontFamily: "Montserrat_600SemiBold",
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   txtBtnLogin: {
     color: "#000",
     textAlign: 'center',
     fontSize: 24,
     fontFamily: "Montserrat_600SemiBold",
-  },
-  olhoIcon: {
-    marginLeft: -50,
-  },
-  icon: {
-    width: 24,
-    height: 24,
   },
 });
