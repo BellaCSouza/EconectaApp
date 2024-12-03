@@ -14,7 +14,7 @@ import { useFonts, Montserrat_400Regular, Montserrat_600SemiBold } from '@expo-g
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { db, auth } from "../config/firebaseConnection";
 import { doc, getDoc, setDoc, collection, addDoc, updateDoc } from 'firebase/firestore';
-import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { createUserWithEmailAndPassword, sendEmailVerification } from 'firebase/auth';
 
 
 
@@ -41,33 +41,28 @@ export default function Cadastrar() {
       }
 
       try {
-        const usuarioDocRef = await addDoc(collection(db, "usuario"), {
-          nome,
-          sobrenome,
-          idade,
-          genero,
-          email,
-        });
-
+        // Criação do usuário no Firebase Authentication
         const credencialUsuario = await createUserWithEmailAndPassword(auth, email, senha);
         const user = credencialUsuario.user;
 
-        
+        // Envia o email de verificação
+        await sendEmailVerification(user);
+        Alert.alert("Sucesso", "Cadastro realizado! Confirme seu email para continuar.");
 
-        await updateDoc(usuarioDocRef, { uid: user.uid });
-    
-        Alert.alert("Sucesso", "Usuário cadastrado!");
-        setNome("");
-        setSobrenome("");
-        setIdade("");
-        setGenero("");
-        setEmail("");
-        setSenha("");
+        // Salva o usuário no Firestore
+        await addDoc(collection(db, "usuarios"), { nome, email, uid: user.uid });
+
+        // Redireciona o usuário para a tela de login
         navegacao.navigate("login");
-      } catch (err) {
-        Alert.alert("Erro", `E-mail já cadastrado`);
-      }
+    } catch (error) {
+        console.error(error);
+        if (error.code === 'auth/email-already-in-use') {
+            Alert.alert("Erro", "Este email já está cadastrado.");
+        } else {
+            Alert.alert("Erro", "Algo deu errado. Tente novamente.");
+        }
     }
+}
 
   return (
     <KeyboardAwareScrollView>

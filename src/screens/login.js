@@ -40,6 +40,16 @@ export default function Login() {
       const credencialUsuario = await signInWithEmailAndPassword(auth, email, senha);
       const user = credencialUsuario.user;
 
+
+       // Verificar se o email foi confirmado
+       if (!user.emailVerified) {
+        Alert.alert(
+            "Atenção",
+            "Confirme seu email antes de acessar o aplicativo. Verifique sua caixa de entrada."
+        );
+        return;
+    }
+
       const usuarioDocs = query(collection(db, "usuario"), where("uid", "==", user.uid));
       const querySnapshot = await getDocs(usuarioDocs);
 
@@ -54,7 +64,8 @@ export default function Login() {
           dadosUsuario.sobrenome &&
           dadosUsuario.idade &&
           dadosUsuario.genero &&
-          dadosUsuario.uid
+          dadosUsuario.uid &&
+          !user.emailVerified
         ) {
           setEmail("");
           setSenha("");
@@ -62,14 +73,14 @@ export default function Login() {
           setUsuario(dadosUsuario);
           navegacao.navigate("tab");
         } else {
-          Alert.alert("Erro", "Dados do usuário estão incompletos no banco.");
+          Alert.alert("Erro", `Dados do usuário estão incompletos no banco.Erro: ${err.message}`);
         }
       } else {
-        Alert.alert("Erro", "Usuário não encontrado no banco de dados.");
+        Alert.alert("Erro", `Usuário não encontrado no banco de dados. Erro: ${err.message}`);
       }
 
     } catch (err) {
-      Alert.alert("Erro", `Email e/ou senha incorreta. Erro: ${err.message}`);
+      Alert.alert("Erro", `Email e/ou senha incorreta.Erro: ${err.message}`);
     }
   }
 
