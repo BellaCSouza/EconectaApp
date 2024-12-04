@@ -7,7 +7,7 @@ import {
   Image,
   TouchableOpacity,
   Alert,
-  Button
+  ActivityIndicator
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useFonts, Montserrat_400Regular, Montserrat_600SemiBold } from '@expo-google-fonts/montserrat';
@@ -25,6 +25,7 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
   const [senhaVisivel, setSenhaVisivel] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   if (!fontsCarregadas) {
     return null;
@@ -36,21 +37,22 @@ export default function Login() {
       return;
     }
 
+    setLoading(true);
+
     try {
       const credencialUsuario = await signInWithEmailAndPassword(auth, email, senha);
       const user = credencialUsuario.user;
 
-
-       // Verificar se o email foi confirmado
-       if (!user.emailVerified) {
+      // Verificar se o email foi confirmado
+      if (!user.emailVerified) {
         Alert.alert(
-            "Atenção",
-            "Confirme seu email antes de acessar o aplicativo. Verifique sua caixa de entrada."
+          "Atenção",
+          "Confirme seu e-mail antes de acessar o aplicativo. Verifique sua caixa de entrada."
         );
         return;
-    }
+      }
 
-      const usuarioDocs = query(collection(db, "usuario"), where("uid", "==", user.uid));
+      const usuarioDocs = query(collection(db, "usuarios"), where("uid", "==", user.uid));
       const querySnapshot = await getDocs(usuarioDocs);
 
       if (!querySnapshot.empty) {
@@ -64,25 +66,27 @@ export default function Login() {
           dadosUsuario.sobrenome &&
           dadosUsuario.idade &&
           dadosUsuario.genero &&
-          dadosUsuario.uid &&
-          !user.emailVerified
+          dadosUsuario.uid
         ) {
           setEmail("");
           setSenha("");
-
           setUsuario(dadosUsuario);
           navegacao.navigate("tab");
         } else {
-          Alert.alert("Erro", `Dados do usuário estão incompletos no banco.Erro: ${err.message}`);
+          Alert.alert("Erro", "Dados do usuário estão incompletos no banco de dados.");
         }
       } else {
-        Alert.alert("Erro", `Usuário não encontrado no banco de dados. Erro: ${err.message}`);
+        Alert.alert("Erro", "Usuário não encontrado no banco de dados.");
       }
 
     } catch (err) {
-      Alert.alert("Erro", `Email e/ou senha incorreta.Erro: ${err.message}`);
+      console.error("Erro de login: ", err.message);
+      Alert.alert("Erro", "Email e/ou senha incorretos.");
+    } finally {
+      setLoading(false);
     }
   }
+
 
 
   return (

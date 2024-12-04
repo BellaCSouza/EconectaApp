@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
     StyleSheet,
     Text,
@@ -6,17 +6,16 @@ import {
     TextInput,
     Image,
     TouchableOpacity,
-    Alert
+    Alert,
+    ActivityIndicator
 } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import { useNavigation } from '@react-navigation/native';
 import { useFonts, Montserrat_400Regular, Montserrat_600SemiBold } from '@expo-google-fonts/montserrat';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { db, auth } from "../config/firebaseConnection";
-import { doc, getDoc, setDoc, collection, addDoc, updateDoc } from 'firebase/firestore';
+import { collection, addDoc, query, where, getDocs } from 'firebase/firestore';
 import { createUserWithEmailAndPassword, sendEmailVerification } from 'firebase/auth';
-
-
 
 export default function Cadastrar() {
     const navegacao = useNavigation();
@@ -29,41 +28,105 @@ export default function Cadastrar() {
     const [email, setEmail] = useState("");
     const [senha, setSenha] = useState("");
     const [senhaVisivel, setSenhaVisivel] = useState(false);
+    const [loading, setLoading] = useState(false);
 
     if (!fontsCarregadas) {
         return null;
     }
 
-    async function handleCadastrar() {
-      if (!nome || !sobrenome || !idade || !genero || !email || !senha) {
-        Alert.alert("Atenção", "Preencha todos os campos!");
-        return;
-      }
+    function validarCampos() {
+        if (!nome || !sobrenome || !idade || !genero || !email || !senha) {
+            Alert.alert("Atenção", "Preencha todos os campos!");
+            return false;
+        }
 
-      try {
-        // Criação do usuário no Firebase Authentication
-        const credencialUsuario = await createUserWithEmailAndPassword(auth, email, senha);
-        const user = credencialUsuario.user;
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            Alert.alert("Erro", "Digite um e-mail válido!");
+            return false;
+        }
 
-        // Envia o email de verificação
-        await sendEmailVerification(user);
-        Alert.alert("Sucesso", "Cadastro realizado! Confirme seu email para continuar.");
+        if (senha.length < 6) {
+            Alert.alert("Erro", "A senha deve ter pelo menos 6 caracteres!");
+            return false;
+        }
 
-        // Salva o usuário no Firestore
-        await addDoc(collection(db, "usuarios"), { nome, email, uid: user.uid });
+        return true;
+    }
 
-        // Redireciona o usuário para a tela de login
-        navegacao.navigate("login");
-    } catch (error) {
-        console.error(error);
-        if (error.code === 'auth/email-already-in-use') {
-            Alert.alert("Erro", "Este email já está cadastrado.");
-        } else {
-            Alert.alert("Erro", "Algo deu errado. Tente novamente.");
+    async function salvarUsuario(user) {
+        try {
+            const usuariosRef = collection(db, "usuarios");
+            const querySnapshot = await getDocs(query(usuariosRef, where("email", "==", email)));
+
+            if (!querySnapshot.empty) {
+                Alert.alert("Erro", "Usuário já cadastrado!");
+                return false;
+            }
+
+            await addDoc(usuariosRef, {
+                nome,
+                sobrenome,
+                idade,
+                genero,
+                email,
+                uid: user.uid,
+            });
+
+            return true;
+        } catch (error) {
+            console.error("Erro ao salvar usuário no Firestore:", error);
+            throw error;
         }
     }
-}
 
+    async function handleCadastrar() {
+        if (!validarCampos()) return;
+
+        setLoading(true);
+
+        try {
+            // Criação do usuário no Firebase Authentication
+            const credencialUsuario = await createUserWithEmailAndPassword(auth, email, senha);
+            const user = credencialUsuario.user;
+
+            // Envia o email de verificação
+            await sendEmailVerification(user);
+            Alert.alert(
+                "Sucesso",
+                "Cadastro realizado! Confirme seu e-mail para continuar.",
+                [
+                    {
+                        text: "OK",
+                        onPress: () => navegacao.navigate("login"),
+                    },
+                ]
+            );
+
+            // Salva o usuário no Firestore
+            const sucesso = await salvarUsuario(user);
+            if (!sucesso) return;
+        } catch (error) {
+            console.error(error);
+
+            switch (error.code) {
+                case "auth/email-already-in-use":
+                    Alert.alert("Erro", "Este e-mail já está em uso.");
+                    break;
+                case "auth/invalid-email":
+                    Alert.alert("Erro", "O e-mail fornecido é inválido.");
+                    break;
+                case "auth/weak-password":
+                    Alert.alert("Erro", "A senha é muito fraca.");
+                    break;
+                default:
+                    Alert.alert("Erro", "Algo deu errado. Tente novamente.");
+                    break;
+            }
+        } finally {
+            setLoading(false);
+        }
+    }
   return (
     <KeyboardAwareScrollView>
         <View style={styles.container}>
