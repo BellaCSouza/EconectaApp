@@ -115,6 +115,7 @@ const styles = StyleSheet.create({
   },
   btnLogin: {
     marginTop: 70,
+    marginBottom: 308,
     backgroundColor: "#f28123",
     borderRadius: 30,
     padding: 10,

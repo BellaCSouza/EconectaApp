@@ -41,6 +41,9 @@ export default function Home() {
             </View>
             <View style={styles.body}>
                 <Text style={styles.txtOla}>Olá, {usuario.nome}!</Text>
+
+                <Text style={styles.txt}> Estamos monitorando:</Text>
+                <Text style={styles.areaSensores}>Área 1:</Text>
             </View>
         </View>
     </ScrollView>
@@ -52,6 +55,12 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: '#000',
     },
+    txt: {
+        fontSize: 25,
+        color: "#fff",
+        fontFamily: "Montserrat_400Regular",
+        marginTop: 40,
+      },
     logo: {
         width: 120,
         height: 32,
@@ -68,5 +77,11 @@ const styles = StyleSheet.create({
         fontSize: 40,
         fontFamily: "Montserrat_400Regular",
         color: "#fff",
-    }
+    },
+    areaSensores: {
+        fontSize: 20,
+        color: "#fff",
+        fontFamily: "Montserrat_400Regular",
+        marginTop: 40,
+    },
 });
