@@ -56,15 +56,15 @@ export default function Cadastrar() {
 
     async function salvarUsuario(user) {
         try {
-            const usuariosRef = collection(db, "usuarios");
-            const querySnapshot = await getDocs(query(usuariosRef, where("email", "==", email)));
+            const usuarioRef = collection(db, "usuario");
+            const querySnapshot = await getDocs(query(usuarioRef, where("email", "==", email)));
 
             if (!querySnapshot.empty) {
                 Alert.alert("Erro", "Usuário já cadastrado!");
                 return false;
             }
 
-            await addDoc(usuariosRef, {
+            await addDoc(usuarioRef, {
                 nome,
                 sobrenome,
                 idade,

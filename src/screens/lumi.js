@@ -46,16 +46,7 @@ export default function Temp() {
                         <Text style={styles.title}>Área 1 {`\n`} Sensor 1</Text>
                         <WebView
                             style={styles.webView}
-                            source={{ uri: 'https://example.com/temperatura' }}
-                        />
-                    </View>
-
-                    {/* Segundo gráfico */}
-                    <View style={styles.webViewContainer}>
-                        <Text style={styles.title}>Área 2 {`\n`} Sensor 1</Text>
-                        <WebView
-                            style={styles.webView}
-                            source={{ uri: 'https://example.com/umidade-solo' }}
+                            source={{ uri: 'http://192.168.212.96:1880/lumi' }}
                         />
                     </View>
                 </View>
@@ -88,8 +79,8 @@ const styles = StyleSheet.create({
     },
     webView: {
         flex: 1,
-        borderWidth: 100,
-        marginBottom: 55,
+        height: 600,
+        width: '100%',
     },
     areaNav: {
         flex: 1,

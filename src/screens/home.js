@@ -42,8 +42,13 @@ export default function Home() {
             <View style={styles.body}>
                 <Text style={styles.txtOla}>Olá, {usuario.nome}!</Text>
 
-                <Text style={styles.txt}> Estamos monitorando:</Text>
-                <Text style={styles.areaSensores}>Área 1:</Text>
+                <Text style={styles.txt}>Estamos monitorando:</Text>
+                <Text style={styles.txt}>1 Plantação{"\n"}
+                    1 Sensor de Temperatura{"\n"}
+                    3 Sensor de Umidade do Solo{"\n"}
+                    1 Sensor de Umidade do Ar{"\n"}
+                    1 Sensor de Luminosidade
+                </Text>
             </View>
         </View>
     </ScrollView>
@@ -56,10 +61,12 @@ const styles = StyleSheet.create({
         backgroundColor: '#000',
     },
     txt: {
-        fontSize: 25,
+        fontSize: 28,
         color: "#fff",
         fontFamily: "Montserrat_400Regular",
+        marginBottom: 40,
         marginTop: 40,
+        textAlign: 'center',
       },
     logo: {
         width: 120,

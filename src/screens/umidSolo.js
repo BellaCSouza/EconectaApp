@@ -46,7 +46,7 @@ export default function Temp() {
                         <Text style={styles.title}>Área 1 {`\n`} Sensor 1</Text>
                         <WebView
                             style={styles.webView}
-                            source={{ uri: 'https://example.com/temperatura' }}
+                            source={{ uri: 'http://192.168.212.96:1880/umid-solo1' }}
                         />
                     </View>
 
@@ -55,7 +55,7 @@ export default function Temp() {
                         <Text style={styles.title}>Área 1 {`\n`} Sensor 2</Text>
                         <WebView
                             style={styles.webView}
-                            source={{ uri: 'https://example.com/umidade-solo' }}
+                            source={{ uri: 'http://192.168.212.96:1880/umid-solo2' }}
                         />
                     </View>
 
@@ -64,28 +64,9 @@ export default function Temp() {
                         <Text style={styles.title}>Área 1 {`\n`} Sensor 3</Text>
                         <WebView
                             style={styles.webView}
-                            source={{ uri: 'https://example.com/umidade-solo' }}
+                            source={{ uri: 'http://192.168.212.96:1880/umid-solo3' }}
                         />
                     </View>
-
-                    {/* Quarto gráfico */}
-                    <View style={styles.webViewContainer}>
-                        <Text style={styles.title}>Área 2 {`\n`} Sensor 1</Text>
-                        <WebView
-                            style={styles.webView}
-                            source={{ uri: 'https://example.com/umidade-solo' }}
-                        />
-                    </View>
-
-                    {/* Quinto gráfico */}
-                    <View style={styles.webViewContainer}>
-                        <Text style={styles.title}>Área 2 {`\n`} Sensor 2</Text>
-                        <WebView
-                            style={styles.webView}
-                            source={{ uri: 'https://example.com/umidade-solo' }}
-                        />
-                    </View>
-
                 </View>
             </View>
         </ScrollView>
@@ -116,8 +97,8 @@ const styles = StyleSheet.create({
     },
     webView: {
         flex: 1,
-        borderWidth: 100,
-        marginBottom: 55,
+        height: 600,
+        width: '100%',
     },
     areaNav: {
         flex: 1,

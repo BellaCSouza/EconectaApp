@@ -52,7 +52,7 @@ export default function Login() {
         return;
       }
 
-      const usuarioDocs = query(collection(db, "usuarios"), where("uid", "==", user.uid));
+      const usuarioDocs = query(collection(db, "usuario"), where("uid", "==", user.uid));
       const querySnapshot = await getDocs(usuarioDocs);
 
       if (!querySnapshot.empty) {
@@ -80,7 +80,6 @@ export default function Login() {
       }
 
     } catch (err) {
-      console.error("Erro de login: ", err.message);
       Alert.alert("Erro", "Email e/ou senha incorretos.");
     } finally {
       setLoading(false);
@@ -90,7 +89,9 @@ export default function Login() {
 
 
   return (
-    <KeyboardAwareScrollView>
+    <KeyboardAwareScrollView
+      style={{ flex: 1 }}
+      contentContainerStyle={{ flexGrow: 1 }}>
       <View style={styles.container}>
         <Image
           source={require("../../assets/logo.png")}
@@ -159,8 +160,7 @@ export default function Login() {
             style={{ color: '#f28123',
              textAlign: 'center',
               fontSize: 15,
-               fontFamily: "Montserrat_600SemiBold", 
-               marginBottom:40,}} >
+               fontFamily: "Montserrat_600SemiBold"}} >
                 Cadastre-se
           </Text>
         </TouchableOpacity>
