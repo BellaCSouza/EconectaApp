@@ -48,7 +48,8 @@ export default function TrocaSenha() {
   }
 
   return (
-    <KeyboardAwareScrollView>
+    <KeyboardAwareScrollView
+    contentContainerStyle={{ flexGrow: 1 }}>
       <View style={styles.container}>
         <Image source={require("../../assets/logo.png")} style={styles.logo} />
         <Text style={styles.txtLogin}>Esqueci minha senha</Text>

@@ -46,7 +46,7 @@ export default function Temp() {
                         <Text style={styles.title}>Área 1 {`\n`} Sensor 1</Text>
                         <WebView
                             style={styles.webView}
-                            source={{ uri: 'http://192.168.15.9:1880/temp' }}
+                            source={{ uri: 'http://192.168.212.96:1880/temp' }}
                         />
                     </View>
                 </View>
